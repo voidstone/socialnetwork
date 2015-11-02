@@ -93,6 +93,13 @@ Route::get('/friends/accept/{username}', [
     'middleware' => ['auth'],
 ]);
 
+
+Route::post('/friends/delete/{username}', [
+    'uses' =>'\Chatty\Http\Controllers\FriendController@postDelete',
+    'as' => 'friend.delete',
+    'middleware' => ['auth'],
+]);
+
 Route::post('/status', [
     'uses' =>'\Chatty\Http\Controllers\StatusController@postStatus',
     'as' => 'status.post',
@@ -102,5 +109,11 @@ Route::post('/status', [
 Route::post('/status/{statusId}/reply', [
     'uses' =>'\Chatty\Http\Controllers\StatusController@postReply',
     'as' => 'status.reply',
+    'middleware' => ['auth'],
+]);
+
+Route::get('/status/{statsId}/like', [
+    'uses' =>'\Chatty\Http\Controllers\StatusController@getLike',
+    'as' => 'status.like',
     'middleware' => ['auth'],
 ]);

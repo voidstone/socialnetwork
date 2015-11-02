@@ -1,5 +1,9 @@
 <?php
 namespace Chatty\Models;
+
+
+
+use Chatty\Models\Status;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -53,6 +57,11 @@ class User extends Model implements AuthenticatableContract
         return $this->hasMany('Chatty\Models\Status', 'user_id');
     }
 
+    public function likes()
+    {
+        return $this->hasMany('Chatty\Models\Like', 'user_id');
+    }
+
     public function friendsOfMine() {
         return $this->belongsToMany('Chatty\Models\User', 'friends','user_id','friend_id');
     }
@@ -69,31 +78,52 @@ class User extends Model implements AuthenticatableContract
         return $this->friendsOfMine()->wherePivot('accepted',false)->get();
     }
 
-    public function friendRequestsPending() {
+    public function friendRequestsPending() 
+    {
         return $this->friendOf()->wherePivot('accepted',false)->get();
     }
 
-    public function hasFriendRequestPending(User $user) {
+    public function hasFriendRequestPending(User $user) 
+    {
         return (bool) $this->friendRequestsPending()->where('id', $user->id)->count();
     }
 
-    public function hasFriendRequestReceived(User $user) {
+    public function hasFriendRequestReceived(User $user) 
+    {
         return (bool) $this->friendRequests()->where('id', $user->id)->count();
     }
 
-    public function addFriend(User $user) {
+    public function addFriend(User $user) 
+    {
         $this->friendOf()->attach($user->id);
     }
 
-    public function acceptFriendRequest(User $user) {
+    public function deleteFriend(User $user) 
+    {
+        $this->friendOf()->detach($user->id);
+        $this->friendsOfMine()->detach($user->id);
+
+    }
+
+    public function acceptFriendRequest(User $user) 
+    {
         $this->friendRequests()->where('id', $user->id)->first()
         ->pivot->update([
             'accepted' => true,
              ]); 
     }
 
-    public function isFriendsWith(User $user) {
+    public function isFriendsWith(User $user) 
+    {
         return (bool) $this->friends()->where('id', $user->id)->count();
     }
+
+    public function hasLikedStatus(Status $status)
+    {
+        return $status->likes->where('user_id', $this->id)->count();
+
+    }
+
+
 
 }
